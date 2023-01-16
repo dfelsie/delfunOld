@@ -1,5 +1,4 @@
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
-import { v4 as uuidv4 } from "uuid";
 export default async function addFakeUsers() {
   const FAKE_USER_NAMES = [
     "Alice",
@@ -19,11 +18,9 @@ export default async function addFakeUsers() {
       FAKE_USER_NAMES[i % FAKE_USER_NAMES.length] +
       new Date().getTime().toString();
     const fakeEmail = fakeName + "@fakemail.com";
-    const portId = uuidv4();
     const newUser = await prisma?.user.create({
       data: {
         isTest: true,
-        portfolioId: portId,
         email: fakeEmail,
         name: fakeName,
       },
@@ -31,11 +28,5 @@ export default async function addFakeUsers() {
     if (isNullOrUndefined(newUser)) {
       throw Error("");
     }
-    await prisma?.portfolio.create({
-      data: {
-        uid: newUser.id,
-        id: portId,
-      },
-    });
   }
 }

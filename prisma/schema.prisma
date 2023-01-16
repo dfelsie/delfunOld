@@ -8,23 +8,18 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String        @id @default(uuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
-  isTest        Boolean   @default(false)
-  balance       Float     @default(1000000)
-  portfolioId   String    @default(uuid())
+  isTest        Boolean       @default(false)
+  balance       Float         @default(1000000)
   accounts      Account[]
-  sessions      Session[]
   Holding       Holding[]
+  sessions      Session[]
+  transactions  Transaction[]
 }
-
-//If we know the current holdings and balance,
-//do we really need a portfolio?
-//Maybe we do, need more thinking.
-//Got rid of oit
 
 model Stock {
   id     String @id @default(uuid())
@@ -37,10 +32,10 @@ model Holding {
   quantity     Int
   buy_price    Float
   stock_symbol String
-  portfolio_id String
   start_date   DateTime  @default(now())
   end_date     DateTime?
   uid          String
+  free_balance Float
   user         User      @relation(fields: [uid], references: [id], onDelete: Cascade)
 }
 
@@ -48,12 +43,12 @@ model Transaction {
   id           String   @id @default(uuid())
   timestamp    DateTime @default(now())
   stock_symbol String
-  portfolio_id String
   unit_price   Float
   quantity     Float
   is_buy       Boolean  @default(true)
   free_balance Float
   uid          String
+  user         User     @relation(fields: [uid], references: [id], onDelete: Cascade)
 }
 
 model StockTimeVal {

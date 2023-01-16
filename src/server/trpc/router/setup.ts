@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { getCsvData } from "../../helperFuncs/setup/addAllCsvData";
-import addFakeTransactions from "../../helperFuncs/setup/addFakeTransactions";
+import addFakeTransactions, {
+  makeFakeTransactions,
+} from "../../helperFuncs/setup/addFakeTransactions";
 import addFakeUsers from "../../helperFuncs/setup/addFakeUsers";
 import { router, publicProcedure } from "../trpc";
 
@@ -29,7 +31,8 @@ export const setupRouter = router({
   }),
   addFakeTransactions: publicProcedure.mutation(async ({}) => {
     try {
-      addFakeTransactions();
+      //addFakeTransactions();
+      makeFakeTransactions();
     } catch (error) {
       console.log(error);
     }

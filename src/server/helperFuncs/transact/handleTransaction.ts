@@ -1,11 +1,11 @@
-import type { Portfolio, StockTimeVal } from "@prisma/client";
-import type { User } from "next-auth";
+import type { StockTimeVal } from "@prisma/client";
+import type { User as NextUser } from "next-auth";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
 
 export async function handleTransaction(
   quantity: number,
   symbol: string,
-  user: User,
+  user: NextUser,
   isBuy = true,
   transactionTime?: Date
 ) {
@@ -30,7 +30,7 @@ export async function handleTransaction(
 export async function doBuy(
   quantity: number,
   symbol: string,
-  user: User,
+  user: NextUser,
   transactionTime: Date,
   isCurrent = true
 ) {
@@ -87,42 +87,20 @@ export async function doBuy(
     if (totPrice > prismaUserVal.balance) {
       throw new Error("Balance insufficient");
     }
-    const prismaPortfolioVal = await prisma?.portfolio.findFirst({
+    /* const prismaPortfolioVal = await prisma?.portfolio.findFirst({
       where: {
         uid: {
           equals: user.id,
         },
       },
-    });
-    if (
-      typeof prismaPortfolioVal === "undefined" ||
-      prismaPortfolioVal === null
-    ) {
-      const newPort = await prisma?.portfolio.create({
-        data: {
-          uid: user.id,
-        },
-      });
-      if (typeof newPort === "undefined") {
-        throw new Error("Couldn't create portfolio");
-      }
-      await prisma?.user.update({
-        where: {
-          id: prismaUserVal.id,
-        },
-        data: {
-          balance: prismaUserVal.balance - totPrice,
-        },
-      });
-      return await addStockToPortfolio(
-        newPort,
-        quantity,
-        timeVal,
-        transactionTime,
-        prismaUserVal.balance,
-        true
-      );
-    }
+    }); */
+    await addStockToPortfolio(
+      user.id,
+      quantity,
+      timeVal,
+      transactionTime,
+      prismaUserVal.balance
+    );
     await prisma?.user.update({
       where: {
         id: prismaUserVal.id,
@@ -131,13 +109,6 @@ export async function doBuy(
         balance: prismaUserVal.balance - totPrice,
       },
     });
-    return await addStockToPortfolio(
-      prismaPortfolioVal,
-      quantity,
-      timeVal,
-      transactionTime,
-      prismaUserVal.balance
-    );
   } catch (e) {
     throw e;
   }
@@ -145,7 +116,7 @@ export async function doBuy(
 export async function doSell(
   quantity: number,
   symbol: string,
-  user: User,
+  user: NextUser,
   transactionTime: Date,
   isCurrent = true
 ) {
@@ -159,6 +130,11 @@ export async function doSell(
   let timeVal;
   if (!isCurrent) {
     timeVal = await prisma?.stockTimeVal.findFirst({
+      orderBy: [
+        {
+          timestamp: "desc",
+        },
+      ],
       where: {
         stock_symbol: {
           equals: symbol,
@@ -198,7 +174,7 @@ export async function doSell(
     throw new Error("Couldn't find that user");
   }
 
-  const prismaPortfolioVal = await prisma?.portfolio.findFirst({
+  /*   const prismaPortfolioVal = await prisma?.portfolio.findFirst({
     where: {
       uid: {
         equals: user.id,
@@ -207,11 +183,11 @@ export async function doSell(
   });
   if (isNullOrUndefined(prismaPortfolioVal)) {
     throw new Error("No existing portfolio");
-  }
+  }*/
   const currHolding = await prisma?.holding.findFirst({
     where: {
-      portfolio_id: {
-        equals: prismaPortfolioVal.id,
+      uid: {
+        equals: user.id,
       },
       stock_symbol: {
         equals: symbol,
@@ -237,17 +213,18 @@ export async function doSell(
       end_date: transactionTime,
     },
   });
+  const totSaleVal = quantity * timeVal.price;
   if (currHolding.quantity !== quantity) {
     await prisma?.holding.create({
       data: {
         buy_price: currHolding.buy_price,
         quantity: currHolding.quantity - quantity,
         stock_symbol: currHolding.stock_symbol,
-        portfolio_id: currHolding.portfolio_id,
+        free_balance: prismaUserVal.balance + totSaleVal,
+        uid: user.id,
       },
     });
   }
-  const totSaleVal = quantity * timeVal.price;
   await prisma?.user.update({
     where: {
       id: prismaUserVal.id,
@@ -256,10 +233,11 @@ export async function doSell(
       balance: prismaUserVal.balance + totSaleVal,
     },
   });
+
   return await prisma?.transaction.create({
     data: {
-      is_buy: true,
-      portfolio_id: currHolding.portfolio_id,
+      is_buy: false,
+      uid: user.id,
       quantity: quantity,
       stock_symbol: timeVal.stock_symbol,
       unit_price: timeVal.price,
@@ -270,18 +248,19 @@ export async function doSell(
 }
 
 async function addStockToPortfolio(
-  portfolio: Portfolio,
+  uid: string,
   quantity: number,
   timeVal: StockTimeVal,
   transactionTime: Date,
   prevBalance: number,
   portfolioIsNew = false
 ) {
+  const totCost = timeVal.price * quantity;
   if (!portfolioIsNew) {
     const prevHolding = await prisma?.holding.findFirst({
       where: {
-        portfolio_id: {
-          equals: portfolio.id,
+        uid: {
+          equals: uid,
         },
         stock_symbol: {
           equals: timeVal.stock_symbol,
@@ -309,7 +288,8 @@ async function addStockToPortfolio(
           buy_price: timeVal.price,
           stock_symbol: timeVal.stock_symbol,
           quantity: quantity,
-          portfolio_id: portfolio.id,
+          uid: uid,
+          free_balance: prevBalance - totCost,
         },
       });
     }
@@ -320,18 +300,19 @@ async function addStockToPortfolio(
         buy_price: timeVal.price,
         stock_symbol: timeVal.stock_symbol,
         quantity: quantity,
-        portfolio_id: portfolio.id,
+        uid: uid,
+        free_balance: prevBalance - totCost,
       },
     });
   }
   return await prisma?.transaction.create({
     data: {
       is_buy: true,
-      portfolio_id: portfolio.id,
+      uid: uid,
       quantity: quantity,
       stock_symbol: timeVal.stock_symbol,
       unit_price: timeVal.price,
-      free_balance: prevBalance + timeVal.price * quantity,
+      free_balance: prevBalance - timeVal.price * quantity,
       timestamp: transactionTime,
     },
   });

@@ -8,7 +8,7 @@ type Props = {
 
 export default function ChartPart({ chartName, graphData }: Props) {
   return (
-    <div className="w-2/3 h-1/3">
+    <div className="h-1/3 w-2/3">
       <h5>{chartName}</h5>
       <Linechart graphData={graphData} />
     </div>

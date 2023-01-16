@@ -1,10 +1,8 @@
-import { GetServerSideProps, NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import React from "react";
 import Appshell from "../../Components/Appshell/Appshell";
 import UserProfile from "../../Components/UserProfile/UserProfile";
-import StockData from "../../Core/Types/StockData";
 import isNullOrUndefined from "../../server/common/utils/isNullOrUndefined";
 import { trpc } from "../../utils/trpc";
 export default function User() {
@@ -39,7 +37,6 @@ export default function User() {
   if (userIsLoading || userIsError || isNullOrUndefined(userDataRes)) {
     return <></>;
   }
-  console.log(portfolioDataRes.data);
   return (
     <Appshell>
       <UserProfile

@@ -11,9 +11,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { sampleGraphData } from "../../Core/Consts/consts";
-
-type Props = {};
+import { sampleGraphData } from "../../../Core/Consts/consts";
 
 ChartJS.register(
   CategoryScale,
