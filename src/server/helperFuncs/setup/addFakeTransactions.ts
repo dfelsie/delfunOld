@@ -133,56 +133,6 @@ function updateUserTransLogWithSell(
   console.log("Error selling: EOF");
 }
 
-//Instead of all sellable stocks, maybe just return
-//All the stocks we WILL actually sell w values for today
-function getSellableStocksForThisUserToday(
-  timeToStvMap: Map<string, StockTimeVal[]>,
-  uidToTransactionLogMap: Map<string, UserHoldingLog>,
-  uid: string,
-  //all possible dates to sell from
-  //Tod
-  dateList: string[],
-  todayDateStr: string,
-  numSellableStocksToGet: number
-) {
-  return;
-  /*   const allAvailableHoldings = [] as UserHolding[];
-  const holdingPriceMap = new Map<UserHolding, StockTimeVal>();
-
-  for (let i = 0; i < dateList.length; i++) {
-    const val = uidToTransactionLogMap
-      .get(uid)
-      ?.holdingDateStrMap.get(dateList[i] ?? "");
-    const pricesToday = timeToStvMap.get(todayDateStr);
-    if (isNullOrUndefined(pricesToday)) {
-      continue;
-      //return new Map<UserHolding, StockTimeVal>();
-    }
-
-    if (isNullOrUndefined(val)) {
-      continue;
-      //return new Map<UserHolding, StockTimeVal>();
-    }
-    allAvailableHoldings.push(...val);
-  }
-
-  for (let i = 0; i < dateList.length; i++) {
-    const holdingsToday=allAvailableHoldings.filter((val)=>val.start_date.toUTCString()===dateList[i])
-    for(let j=0; j<holdingsToday.length; j++){
-      const priceFor = pricesToday.find(
-        (stv) => stv.stock_symbol === val[i]?.stock_symbol
-      );
-      if (priceFor === undefined) {
-        continue;
-      }
-      holdingPriceMap.set(val[i] as UserHolding, priceFor);
-
-    }
-  }
-
-  return holdingPriceMap; */
-}
-
 export function getSellableStock(
   dateList: string[],
   uidToHoldingMap: Map<string, UserHoldingLog>,
@@ -254,17 +204,9 @@ export async function createUserTransactionLogs(
       console.log("No buyable stocks today");
       continue;
     }
-    const prevDate = i <= 0 ? null : (dateList[i - 1] as string);
+    //const prevDate = i <= 0 ? null : (dateList[i - 1] as string);
     for (let j = 0; j < userList.length; j++) {
       const currUser = userList[j] as User;
-      getSellableStocksForThisUserToday(
-        timeToStvMap,
-        uidToTransactionLogMap,
-        currUser.id,
-        listOfDatesIncludingToday,
-        currDate,
-        numTransactions
-      );
       for (let n = 0; n < numTransactions; n++) {
         const buyableStocksForThisUserToday = buyableStocksToday.filter(
           (val) => val.price * numToTransact <= currUser.balance
