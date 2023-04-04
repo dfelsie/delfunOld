@@ -1,16 +1,18 @@
-/* type HoldingWithDate = {
-  uid: string;
-  start_date: Date;
-  holding: Holding[];
+import type { holding } from "@prisma/client";
+
+type HoldingWithDate = {
+  date: Date;
+  holdings: holding[];
 };
 
 export async function getUserHoldingsOverTime(uid: string, dates: Date[]) {
-  const holdings = await prisma.holding.groupBy({
-    by: ["uid", "start_date"],
+  dates.sort((a, b) => a.getTime() - b.getTime());
+  const holdings = await prisma?.holding.findMany({
+    //by: ["uid", "start_date"],
     where: {
       uid: uid,
       start_date: {
-        lte: new Date(Math.max(...dates)),
+        lte: dates[dates.length - 1],
       },
       OR: [
         {
@@ -20,35 +22,35 @@ export async function getUserHoldingsOverTime(uid: string, dates: Date[]) {
         },
         {
           end_date: {
-            gt: new Date(Math.min(...dates)),
+            gt: dates[0],
           },
         },
       ],
     },
     orderBy: {
-      uid: "asc",
       start_date: "asc",
     },
   });
 
+  if (holdings === undefined) {
+    return [];
+  }
+
   const holdingsWithDates: HoldingWithDate[] = [];
 
   for (const date of dates) {
-    const holdingsForDate: Holding[] = [];
-
-    for (const holding of holdings) {
-      if (holding.uid === uid && holding.start_date <= date) {
-        holdingsForDate.push(holding);
-      }
-    }
+    const holdingsForDate = holdings.filter((holding) => {
+      return (
+        holding.start_date <= date &&
+        (holding.end_date === null || holding.end_date > date)
+      );
+    });
 
     holdingsWithDates.push({
-      uid: uid,
-      start_date: date,
-      holding: holdingsForDate,
+      date,
+      holdings: holdingsForDate,
     });
   }
 
   return holdingsWithDates;
 }
- */

@@ -4,6 +4,8 @@ import { getUserHoldingsOnDay } from "./getUserHoldingsOnDay";
 import { STOCK_DAYS } from "../../common/consts/stockTradingDates";
 import type OneDayPortfolioVal from "../../../Core/Types/OneDayPortfolioVal";
 import { pairHoldingsWithStockTimeVal } from "../utils/PairHoldingWithStockTimeVal";
+import makeDateTradingRange from "../utils/makeDateTradingRange";
+import { getUserHoldingsOverTime } from "./getUserHoldingsOverTimeRange";
 
 //If we can't find early transaction.
 //May have to fix this.
@@ -30,74 +32,77 @@ async function getPortfolioValAtDate(
   range: string
 ) {
   const holdingList = [];
-  if (range === "5d") {
-    //Do we need to get the very first transaction?
-    for (let i = 4; i >= 0; i--) {
-      //as string is needed in case out of bounds, need to fix.
-      const currDate = new Date(STOCK_DAYS[dateIndex + i] as string);
-      const oneDayAfterCurrDate = new Date(
-        STOCK_DAYS[dateIndex + i - 1] as string
-      );
-      console.log(currDate);
+  const dateRange = makeDateTradingRange(dateIndex, range);
+  const allHoldingsInRange = await getUserHoldingsOverTime(user.id, dateRange);
 
-      let holdingsForDay = await getUserHoldingsOnDay(
-        user.id,
-        oneDayAfterCurrDate
-      );
-      if (isNullOrUndefined(holdingsForDay)) {
-        holdingsForDay = [];
-      }
-      const lastTransactionOfDay = await prisma?.transaction.findFirst({
-        where: {
-          uid: {
-            equals: user.id,
-          },
-          timestamp: {
-            lt: oneDayAfterCurrDate,
-          },
-        },
-        orderBy: [
-          {
-            timestamp: "desc",
-          },
-        ],
-      });
-      let freeBalance: number;
+  //Do we need to get the very first transaction?
+  for (let i = 0; i < dateRange.length; i++) {
+    //as string is needed in case out of bounds, need to fix.
+    const currDate = new Date(STOCK_DAYS[dateIndex - i] as string);
+    const oneDayAfterCurrDate = new Date(
+      STOCK_DAYS[dateIndex - i + 1] as string
+    );
+    console.log(currDate);
 
-      if (isNullOrUndefined(lastTransactionOfDay)) {
-        if (holdingsForDay.length > 0) {
-          freeBalance =
-            holdingsForDay[holdingsForDay.length - 1]?.free_balance ??
-            DEFAULT_BALANCE;
-        }
-        //Default if we can't find a previous transaction or holding
-        freeBalance = DEFAULT_BALANCE;
-      } else {
-        freeBalance = lastTransactionOfDay.free_balance;
-      }
-
-      const pairedHoldings = await pairHoldingsWithStockTimeVal(
-        holdingsForDay,
-        currDate
-      );
-      const totalValue = pairedHoldings.reduce(
-        (totalValue, currentHolding) =>
-          totalValue +
-          (currentHolding?.price ?? 0) * currentHolding.holding.quantity,
-        freeBalance
-      );
-
-      const thisDayPortfolioVal: OneDayPortfolioVal = {
-        freeBalance: freeBalance,
-        holdings: pairedHoldings,
-        timestamp: currDate,
-        totalValue: totalValue,
-        uid: user.id,
-      };
-
-      holdingList.push(thisDayPortfolioVal);
+    /*     let holdingsForDay = await getUserHoldingsOnDay(
+      user.id,
+      oneDayAfterCurrDate
+    ); */
+    let holdingsForDay = allHoldingsInRange[i]?.holdings;
+    if (isNullOrUndefined(holdingsForDay)) {
+      holdingsForDay = [];
     }
+    const lastTransactionOfDay = await prisma?.transaction.findFirst({
+      where: {
+        uid: {
+          equals: user.id,
+        },
+        timestamp: {
+          lt: oneDayAfterCurrDate,
+        },
+      },
+      orderBy: [
+        {
+          timestamp: "desc",
+        },
+      ],
+    });
+    let freeBalance: number;
+
+    if (isNullOrUndefined(lastTransactionOfDay)) {
+      if (holdingsForDay.length > 0) {
+        freeBalance =
+          holdingsForDay[holdingsForDay.length - 1]?.free_balance ??
+          DEFAULT_BALANCE;
+      }
+      //Default if we can't find a previous transaction or holding
+      freeBalance = DEFAULT_BALANCE;
+    } else {
+      freeBalance = lastTransactionOfDay.free_balance;
+    }
+
+    const pairedHoldings = await pairHoldingsWithStockTimeVal(
+      holdingsForDay,
+      currDate
+    );
+    const totalValue = pairedHoldings.reduce(
+      (totalValue, currentHolding) =>
+        totalValue +
+        (currentHolding?.price ?? 0) * currentHolding.holding.quantity,
+      freeBalance
+    );
+
+    const thisDayPortfolioVal: OneDayPortfolioVal = {
+      freeBalance: freeBalance,
+      holdings: pairedHoldings,
+      timestamp: currDate,
+      totalValue: totalValue,
+      uid: user.id,
+    };
+
+    holdingList.push(thisDayPortfolioVal);
   }
+
   return holdingList;
 }
 
