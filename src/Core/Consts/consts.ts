@@ -102,3 +102,130 @@ export const sampleGraphData = [
   [98, 17],
   [99, 14],
 ];
+
+export const testPort = {
+  json: [
+    {
+      freeBalance: 1000000,
+      holdings: [],
+      timestamp: "2022-10-21T00:00:00.000Z",
+      totalValue: 1000000,
+      uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+    },
+    {
+      freeBalance: 999335.5,
+      holdings: [
+        {
+          holding: {
+            id: "clcwzuyqk00017164c2tqtgs7",
+            quantity: 5,
+            buy_price: 56.1,
+            stock_symbol: "TRMB",
+            start_date: "2022-10-24T00:00:00.002Z",
+            end_date: "2022-10-27T00:00:00.000Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 999719.5,
+          },
+          price: 56.1,
+          timestamp: "2022-10-24T00:00:00.000Z",
+        },
+        {
+          holding: {
+            id: "clcwzuyqk00027164f93n0sn4",
+            quantity: 5,
+            buy_price: 36.52,
+            stock_symbol: "KHC",
+            start_date: "2022-10-24T00:00:00.003Z",
+            end_date: "2022-10-25T00:00:00.001Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 999536.9,
+          },
+          price: 36.52,
+          timestamp: "2022-10-24T00:00:00.000Z",
+        },
+      ],
+      timestamp: "2022-10-24T00:00:00.000Z",
+      totalValue: 999798.6,
+      uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+    },
+    {
+      freeBalance: 999536.9,
+      holdings: [
+        {
+          holding: {
+            id: "clcwzuyqk00017164c2tqtgs7",
+            quantity: 5,
+            buy_price: 56.1,
+            stock_symbol: "TRMB",
+            start_date: "2022-10-24T00:00:00.002Z",
+            end_date: "2022-10-27T00:00:00.000Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 999719.5,
+          },
+          price: 58.15,
+          timestamp: "2022-10-25T00:00:00.000Z",
+        },
+        {
+          holding: {
+            id: "clcwzuyqk00047164f3r75dcn",
+            quantity: 5,
+            buy_price: 75.33,
+            stock_symbol: "BXP",
+            start_date: "2022-10-25T00:00:00.002Z",
+            end_date: "2022-10-26T00:00:00.001Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 999342.85,
+          },
+          price: 75.33,
+          timestamp: "2022-10-25T00:00:00.000Z",
+        },
+        {
+          holding: {
+            id: "clcwzuyqk00057164ndcj4psk",
+            quantity: 5,
+            buy_price: 214.29,
+            stock_symbol: "TSCO",
+            start_date: "2022-10-25T00:00:00.003Z",
+            end_date: "2022-10-26T00:00:00.004Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 998271.4,
+          },
+          price: 214.29,
+          timestamp: "2022-10-25T00:00:00.000Z",
+        },
+      ],
+      timestamp: "2022-10-25T00:00:00.000Z",
+      totalValue: 1001275.75,
+      uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+    },
+    {
+      freeBalance: 998271.4,
+      holdings: [],
+      timestamp: "2022-10-26T00:00:00.000Z",
+      totalValue: 998271.4,
+      uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+    },
+    {
+      freeBalance: 1000000,
+      holdings: [
+        {
+          holding: {
+            id: "clcwzuyqk000a7164dk2rkv9z",
+            quantity: 5,
+            buy_price: 62.06,
+            stock_symbol: "KMX",
+            start_date: "2022-10-27T00:00:00.004Z",
+            end_date: "2022-10-28T00:00:00.001Z",
+            uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+            free_balance: 999555.45,
+          },
+          price: 62.06,
+          timestamp: "2022-10-27T00:00:00.000Z",
+        },
+      ],
+      timestamp: "2022-10-27T00:00:00.000Z",
+      totalValue: 1000310.3,
+      uid: "1860b13b-b285-429d-9fc4-3a219761d758",
+    },
+  ],
+};

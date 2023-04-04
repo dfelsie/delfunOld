@@ -1,4 +1,4 @@
-import type { Holding, User } from "@prisma/client";
+import type { holding, user } from "@prisma/client";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
 import { getUserHoldingsOnDay } from "./getUserHoldingsOnDay";
 import { STOCK_DAYS } from "../../common/consts/stockTradingDates";
@@ -25,12 +25,13 @@ export async function getPortfolioValsOverTime(uid: string, range: string) {
 }
 
 async function getPortfolioValAtDate(
-  user: User,
+  user: user,
   dateIndex: number,
   range: string
 ) {
   const holdingList = [];
   if (range === "5d") {
+    //Do we need to get the very first transaction?
     for (let i = 4; i >= 0; i--) {
       //as string is needed in case out of bounds, need to fix.
       const currDate = new Date(STOCK_DAYS[dateIndex + i] as string);
@@ -41,7 +42,6 @@ async function getPortfolioValAtDate(
 
       let holdingsForDay = await getUserHoldingsOnDay(
         user.id,
-        currDate,
         oneDayAfterCurrDate
       );
       if (isNullOrUndefined(holdingsForDay)) {
@@ -86,16 +86,6 @@ async function getPortfolioValAtDate(
           (currentHolding?.price ?? 0) * currentHolding.holding.quantity,
         freeBalance
       );
-      //Currently have value of holdings at buy time.
-      //Need to join with stock time vals to get current val
-
-      /* const sumWithInitial = array1.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        initialValue
-      );
-      holdingsForDay.reduce((
-        totalValue,currentHolding
-      )=>totalValue+currentHolding.) */
 
       const thisDayPortfolioVal: OneDayPortfolioVal = {
         freeBalance: freeBalance,
@@ -105,10 +95,6 @@ async function getPortfolioValAtDate(
         uid: user.id,
       };
 
-      /*       for(let j=0; j<holdingsForDay)
-      const thisDayPortfolioVal:OneDayPortfolioVal=({
-
-      }); */
       holdingList.push(thisDayPortfolioVal);
     }
   }
@@ -131,6 +117,6 @@ If there's no transactions at all before the day, we can just put the default ba
 
 */
 
-function makeOneDayPortfolioVal(holdingAry: Holding[]) {
+function makeOneDayPortfolioVal(holdingAry: holding[]) {
   return;
 }

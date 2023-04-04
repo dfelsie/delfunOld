@@ -18,12 +18,15 @@ export default function Navbar({ user }: Props) {
         <p className=" mr-6 text-xl normal-case">Pythia </p>
       )}
 
-      <div className="flex-grow">
+      <div className="flex-grow justify-around">
         <NextLink href={"/stocklist"}>
           <p className=" text-xl normal-case">Stock List</p>
         </NextLink>
         <NextLink href={"/transaction"}>
           <p className=" text-xl normal-case">Transaction</p>
+        </NextLink>
+        <NextLink href={"/userlist"}>
+          <p className=" text-xl normal-case">Userlist</p>
         </NextLink>
       </div>
       <div className="flex-grow-[8]"></div>

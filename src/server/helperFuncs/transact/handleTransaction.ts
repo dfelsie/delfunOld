@@ -1,4 +1,4 @@
-import type { StockTimeVal } from "@prisma/client";
+import type { stockTimeVal } from "@prisma/client";
 import type { User as NextUser } from "next-auth";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
 
@@ -250,7 +250,7 @@ export async function doSell(
 async function addStockToPortfolio(
   uid: string,
   quantity: number,
-  timeVal: StockTimeVal,
+  timeVal: stockTimeVal,
   transactionTime: Date,
   prevBalance: number,
   portfolioIsNew = false

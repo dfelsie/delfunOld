@@ -6,18 +6,21 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 import Appshell from "../Components/Appshell/Appshell";
 import Welcome from "../Components/Welcome/Welcome";
+import UserList from "../Components/UserList/UserList";
 
-const Home: NextPage = () => {
+export default function Users() {
   const { data: sessionData, status } = useSession();
-  if (status === "loading") {
+  const { data: userList, isLoading: userListIsLoading } =
+    trpc.otheruserdata.getAllUsers.useQuery();
+  //const userList=trpc.
+  if (status === "loading" || userListIsLoading) {
     return <></>;
   }
   return (
     <>
       <Appshell user={sessionData?.user}>
-        <Welcome />
+        <UserList userList={userList ?? []} />
       </Appshell>
     </>
   );
-};
-export default Home;
+}

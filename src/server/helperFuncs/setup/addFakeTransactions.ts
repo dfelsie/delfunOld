@@ -1,4 +1,4 @@
-import type { Holding, StockTimeVal, User } from "@prisma/client";
+import type { holding, stockTimeVal, user } from "@prisma/client";
 import { STOCK_DAYS } from "../../common/consts/stockTradingDates";
 import getRandValueFromArray from "../../common/utils/getRandValueFromArray";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
@@ -30,12 +30,12 @@ type UserTransaction = {
 };
 
 type UserHoldingLog = {
-  user: User;
+  user: user;
   holdingDateStrMap: Map<string, UserHolding[]>;
 };
 
 function updateUserTransLogWithBuy(
-  user: User,
+  user: user,
   uidToTransactionLogMap: Map<string, UserHoldingLog>,
   dateStr: string,
   newHolding: UserHolding
@@ -87,7 +87,7 @@ even from multiple days prior.
 //Find date log,
 //subtract from quantity, remove if quantity 0
 function updateUserTransLogWithSell(
-  user: User,
+  user: user,
   dateStrToUserHoldingMap: Map<string, UserHolding[]>,
   oldHoldingDateStr: string,
   dateStr: string,
@@ -136,8 +136,8 @@ function updateUserTransLogWithSell(
 export function getSellableStock(
   dateList: string[],
   uidToHoldingMap: Map<string, UserHoldingLog>,
-  user: User,
-  timeToStvMap: Map<string, StockTimeVal[]>
+  user: user,
+  timeToStvMap: Map<string, stockTimeVal[]>
 ) {
   const currUserHoldings = uidToHoldingMap.get(user.id);
   //Can happen, esp on first day.
@@ -185,8 +185,8 @@ export function getSellableStock(
 //We use prev days holding array to pick current day transactions, then gather
 //all transactions and insert them at the end.
 export async function createUserTransactionLogs(
-  timeToStvMap: Map<string, StockTimeVal[]>,
-  userList: User[],
+  timeToStvMap: Map<string, stockTimeVal[]>,
+  userList: user[],
   dateList: string[],
   numTransactions: number,
   numToTransact: number
@@ -206,7 +206,7 @@ export async function createUserTransactionLogs(
     }
     //const prevDate = i <= 0 ? null : (dateList[i - 1] as string);
     for (let j = 0; j < userList.length; j++) {
-      const currUser = userList[j] as User;
+      const currUser = userList[j] as user;
       for (let n = 0; n < numTransactions; n++) {
         const buyableStocksForThisUserToday = buyableStocksToday.filter(
           (val) => val.price * numToTransact <= currUser.balance
@@ -248,7 +248,7 @@ export async function createUserTransactionLogs(
             is_buy: false,
             quantity: numToTransact,
             stock_symbol: correctStv.stock_symbol,
-            timestamp: new Date(currDate),
+            timestamp: updateHoldingDate,
             uid: currUser.id,
             unit_price: correctStv.price,
           });
@@ -279,7 +279,7 @@ export async function createUserTransactionLogs(
             is_buy: true,
             quantity: numToTransact,
             stock_symbol: stockToBuy.stock_symbol,
-            timestamp: new Date(currDate),
+            timestamp: updateHoldingDate,
             uid: currUser.id,
             unit_price: stockToBuy.price,
           });
@@ -295,7 +295,7 @@ export async function createUserTransactionLogs(
   //const holdingLogs = [...uidToTransactionLogMap.values()];
   const allHoldingsAry = [] as UserHolding[];
   for (let i = 0; i < userList.length; i++) {
-    const currUser = userList[i] as User;
+    const currUser = userList[i] as user;
     //const currLogs = holdingLogs[i]?.holdingDateStrMap.get(dateList[i]);
     const userLogs = uidToTransactionLogMap.get(currUser.id) as UserHoldingLog;
 
@@ -354,14 +354,14 @@ export async function makeFakeTransactions() {
   if (isNullOrUndefined(allBuyPossibilities)) {
     throw Error("No Buy Possibilities");
   }
-  const dateTimeValMap = new Map<string, StockTimeVal[]>();
+  const dateTimeValMap = new Map<string, stockTimeVal[]>();
   //Now with all possibilites, we'd like to group by day.
   for (let i = 0; i < allBuyPossibilities.length; i++) {
-    const currVal = allBuyPossibilities[i] as StockTimeVal;
+    const currVal = allBuyPossibilities[i] as stockTimeVal;
     if (dateTimeValMap.has(currVal.timestamp.toUTCString())) {
       const tempAry = dateTimeValMap.get(
         currVal.timestamp.toUTCString()
-      ) as StockTimeVal[];
+      ) as stockTimeVal[];
       tempAry.push(currVal);
       dateTimeValMap.set(currVal.timestamp.toUTCString(), [...tempAry]);
     } else {
@@ -387,10 +387,10 @@ export async function makeFakeTransactions() {
   return;
 }
 
-function groupSalePossibilitiesByUser(holdingList: Holding[]) {
-  const holdingsGroupedByIds: { [key: string]: Holding[] } = {};
+function groupSalePossibilitiesByUser(holdingList: holding[]) {
+  const holdingsGroupedByIds: { [key: string]: holding[] } = {};
   for (let i = 0; i < holdingList.length; i++) {
-    const currHolding = holdingList[i] as Holding;
+    const currHolding = holdingList[i] as holding;
     if (holdingsGroupedByIds[currHolding.uid]) {
       holdingsGroupedByIds[currHolding.uid]?.push(currHolding);
     } else {
@@ -488,7 +488,7 @@ export default async function addFakeTransactions() {
           //Cast is to set it as not undefined, since the if cond above already checks that
           const salePossibilitesForThisUser = salePossibilitesForThisDayByUid[
             currUser.id
-          ] as Holding[];
+          ] as holding[];
           await addFakeSell(
             QUANTITY_TO_BUY,
             salePossibilitesForThisUser,
@@ -519,8 +519,8 @@ export default async function addFakeTransactions() {
 
 async function addFakeBuy(
   quantity: number,
-  stockPossibilities: StockTimeVal[],
-  currUser: User,
+  stockPossibilities: stockTimeVal[],
+  currUser: user,
   date: Date
 ) {
   const stockToTransact = getRandValueFromArray(stockPossibilities);
@@ -533,8 +533,8 @@ async function addFakeBuy(
 
 async function addFakeSell(
   quantity: number,
-  stockPossibilities: Holding[],
-  currUser: User,
+  stockPossibilities: holding[],
+  currUser: user,
   date: Date,
   oneDayBeforeDate: Date
 ) {

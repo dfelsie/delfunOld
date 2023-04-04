@@ -5,6 +5,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 import Appshell from "../Components/Appshell/Appshell";
 import Transaction from "../Components/Transaction/Transaction";
+import isNullOrUndefined from "../server/common/utils/isNullOrUndefined";
 
 const TransactionPage: NextPage = () => {
   const { data: sessionData, status } = useSession();
@@ -13,6 +14,18 @@ const TransactionPage: NextPage = () => {
   if (status === "loading") {
     return <></>;
   }
+  const uid = sessionData?.user?.id;
+  if (isNullOrUndefined(uid)) {
+    return <></>;
+  }
+  const { data: portfolioData, isFetched } =
+    trpc.userdata.getUserPortfolio.useQuery({
+      uid: uid,
+    });
+  if (isFetched === false) {
+    return <></>;
+  }
+  console.log(portfolioData);
   return (
     <>
       <Head>

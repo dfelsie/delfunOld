@@ -3,7 +3,7 @@ import fs from "fs";
 import { parse } from "fast-csv";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
 const dataPath =
-  "C:\\Users\\DLF\\Documents\\newCode\\t3\\delfun\\src\\server\\data";
+  "C:\\Users\\DLF\\Documents\\newCode\\t3\\delfunOld\\src\\server\\data";
 const fullCsvDataPath = dataPath + "\\stockFullData";
 async function readFullCsv(symbol: string) {
   const stvList: any[] = [];

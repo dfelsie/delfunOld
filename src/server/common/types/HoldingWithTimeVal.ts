@@ -1,7 +1,7 @@
-import type { Holding } from "@prisma/client";
+import type { holding } from "@prisma/client";
 
 type HoldingWithTimeVal = {
-  holding: Holding;
+  holding: holding;
   timestamp?: Date;
   price?: number;
 };

@@ -1,8 +1,4 @@
-export async function getUserHoldingsOnDay(
-  uid: string,
-  date: Date,
-  dateOneDayAfter: Date
-) {
+export async function getUserHoldingsOnDay(uid: string, dateOneDayAfter: Date) {
   return await prisma?.holding.findMany({
     where: {
       OR: [
@@ -24,6 +20,4 @@ export async function getUserHoldingsOnDay(
       },
     },
   });
-
-  return;
 }

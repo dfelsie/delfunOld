@@ -1,10 +1,10 @@
-import { Holding } from "@prisma/client";
+import type { holding } from "@prisma/client";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
-import HoldingWithTimeVal from "../../common/types/HoldingWithTimeVal";
+import type HoldingWithTimeVal from "../../common/types/HoldingWithTimeVal";
 
 //One
 export async function pairHoldingWithStockTimeVal(
-  holding: Holding,
+  holding: holding,
   date: Date,
   dayBeforeDate: Date
 ): Promise<HoldingWithTimeVal> {
@@ -35,7 +35,7 @@ export async function pairHoldingWithStockTimeVal(
 
 //Multiple
 export async function pairHoldingsWithStockTimeVal(
-  holdings: Holding[],
+  holdings: holding[],
   date: Date
 ) {
   let currHolding;
@@ -43,7 +43,7 @@ export async function pairHoldingsWithStockTimeVal(
   const HoldingsWithTimeVal = [];
   for (let i = 0; i < holdings.length; i++) {
     //Shouldn't be undefined.
-    currHolding = holdings[i] as Holding;
+    currHolding = holdings[i] as holding;
 
     mostRecentTimeVal = await prisma?.stockTimeVal.findFirst({
       where: {

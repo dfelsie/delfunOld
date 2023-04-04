@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { timeRanges } from "../../common/types/dayRange";
 import { getPortfolioValsOverTime } from "../../helperFuncs/userData/getPortfolioValsOverTime";
+import { getTransactionsOverPeriod } from "../../helperFuncs/userData/getTransactionsOverPeriod";
 import { router, publicProcedure } from "../trpc";
 
 /* //TODO:
@@ -39,7 +40,7 @@ export const userDataRouter = router({
         success: true,
       };
     }),
-  getPortfolioValuesOverTime: publicProcedure
+  getPortfolioValuesOverPeriod: publicProcedure
     .input(
       z.object({
         uid: z.string(),
@@ -51,6 +52,19 @@ export const userDataRouter = router({
       //This expects a string, but I would prefer it to be an enum
       //of possible time ranges. Not a huge deal though.
       return await getPortfolioValsOverTime(input.uid, input.timeRange);
+    }),
+  getTransactionsOverPeriod: publicProcedure
+    .input(
+      z.object({
+        uid: z.string(),
+        timeRange: z.enum(["timeRanges", ...timeRanges]),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      //Weird problem with zod enum
+      //This expects a string, but I would prefer it to be an enum
+      //of possible time ranges. Not a huge deal though.
+      return await getTransactionsOverPeriod(input.uid, input.timeRange);
     }),
   /*   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.example.findMany();

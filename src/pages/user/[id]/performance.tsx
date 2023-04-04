@@ -1,4 +1,4 @@
-import type { Holding } from "@prisma/client";
+import type { holding } from "@prisma/client";
 import { useRouter } from "next/router";
 import React from "react";
 import { Circles } from "react-loader-spinner";
@@ -7,7 +7,7 @@ import UserTransactionItem from "../../../Components/UserProfile/UserTransaction
 import isNullOrUndefined from "../../../server/common/utils/isNullOrUndefined";
 import { trpc } from "../../../utils/trpc";
 
-function compareHoldingProperties(a: Holding, b: Holding, c: keyof Holding) {
+function compareHoldingProperties(a: holding, b: holding, c: keyof holding) {
   const endDateA = a[c];
   const endDateB = b[c];
 
@@ -52,10 +52,20 @@ export default function Performance() {
     data: portVals,
     isLoading: portValsIsLoading,
     isError: portValsIsError,
-  } = trpc.userdata.getPortfolioValuesOverTime.useQuery({
+  } = trpc.userdata.getPortfolioValuesOverPeriod.useQuery({
     uid: (uid as string) ?? "",
     timeRange: "5d",
   });
+  /*   const {
+    data: transVals,
+    isLoading: transValsIsLoading,
+    isError: transValsIsError,
+  } = trpc.userdata.getTransactionsOverPeriod.useQuery({
+    uid: (uid as string) ?? "",
+    timeRange: "5d",
+  });
+  console.log("Transvals: ", transVals ?? "No transaction data");
+ */
   if (portValsIsError) {
     return <></>;
   }

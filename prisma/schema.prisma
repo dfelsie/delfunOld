@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   id            String        @id @default(uuid())
   name          String?
   email         String?       @unique
@@ -16,18 +16,18 @@ model User {
   isTest        Boolean       @default(false)
   balance       Float         @default(1000000)
   accounts      Account[]
-  Holding       Holding[]
+  holding       holding[]
   sessions      Session[]
-  transactions  Transaction[]
+  transactions  transaction[]
 }
 
-model Stock {
+model stock {
   id     String @id @default(uuid())
   symbol String @unique
   price  Float
 }
 
-model Holding {
+model holding {
   id           String    @id @default(cuid())
   quantity     Int
   buy_price    Float
@@ -36,10 +36,10 @@ model Holding {
   end_date     DateTime?
   uid          String
   free_balance Float
-  user         User      @relation(fields: [uid], references: [id], onDelete: Cascade)
+  user         user      @relation(fields: [uid], references: [id], onDelete: Cascade)
 }
 
-model Transaction {
+model transaction {
   id           String   @id @default(uuid())
   timestamp    DateTime @default(now())
   stock_symbol String
@@ -48,10 +48,10 @@ model Transaction {
   is_buy       Boolean  @default(true)
   free_balance Float
   uid          String
-  user         User     @relation(fields: [uid], references: [id], onDelete: Cascade)
+  user         user     @relation(fields: [uid], references: [id], onDelete: Cascade)
 }
 
-model StockTimeVal {
+model stockTimeVal {
   id           String   @id @default(uuid())
   timestamp    DateTime @default(now())
   stock_symbol String
@@ -71,7 +71,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              user    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -81,7 +81,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

@@ -1,4 +1,3 @@
-import type { Holding } from "@prisma/client";
 import HoldingWithTimeVal from "../../server/common/types/HoldingWithTimeVal";
 
 type OneDayPortfolioVal = {

@@ -39,10 +39,7 @@ export default function User() {
   }
   return (
     <Appshell>
-      <UserProfile
-        stockData={portfolioDataRes.data}
-        username={userDataRes?.name ?? "Anon"}
-      />
+      <UserProfile stockData={portfolioDataRes.data} user={userDataRes} />
     </Appshell>
   );
 }

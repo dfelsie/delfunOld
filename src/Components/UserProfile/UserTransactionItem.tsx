@@ -1,8 +1,8 @@
-import type { Holding } from "@prisma/client";
+import type { holding } from "@prisma/client";
 import React from "react";
 
 type Props = {
-  holding: Holding;
+  holding: holding;
 };
 
 export default function UserTransactionItem({ holding }: Props) {

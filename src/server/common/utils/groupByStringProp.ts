@@ -1,4 +1,4 @@
-import { StockTimeVal } from "@prisma/client";
+import type { stockTimeVal } from "@prisma/client";
 
 //Both of these methods are unused.
 
@@ -22,10 +22,10 @@ export function groupByStringProp(
   }
   return groupedAry;
 }
-export function groupTimeValByDate(objAry: StockTimeVal[]) {
-  const groupedAry: { [key: string]: StockTimeVal[] } = {};
+export function groupTimeValByDate(objAry: stockTimeVal[]) {
+  const groupedAry: { [key: string]: stockTimeVal[] } = {};
   for (let i = 0; i < objAry.length; i++) {
-    const currStockTimeVal = objAry[i] as StockTimeVal;
+    const currStockTimeVal = objAry[i] as stockTimeVal;
     const currStockTimeValDateStr = currStockTimeVal.timestamp.toUTCString();
     if (groupedAry[currStockTimeValDateStr]) {
       groupedAry[currStockTimeValDateStr]?.push(currStockTimeVal);
