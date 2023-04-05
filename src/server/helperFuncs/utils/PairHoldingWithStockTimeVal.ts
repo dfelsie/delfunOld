@@ -1,8 +1,16 @@
-import type { holding } from "@prisma/client";
+import type { holding, stockTimeVal } from "@prisma/client";
 import isNullOrUndefined from "../../common/utils/isNullOrUndefined";
 import type HoldingWithTimeVal from "../../common/types/HoldingWithTimeVal";
+import { HoldingWithDate } from "../userData/getUserHoldingsOverTimeRange";
+import HoldingWithVal from "../../common/types/HoldingWithVal";
+
+export type HoldingWithValAtTime = {
+  holdings: HoldingWithVal[];
+  time: Date;
+};
 
 //One
+//Used in useless addFakeTransaction file and nowhere else
 export async function pairHoldingWithStockTimeVal(
   holding: holding,
   date: Date,
@@ -33,40 +41,58 @@ export async function pairHoldingWithStockTimeVal(
   }
 }
 
-//Multiple
-export async function pairHoldingsWithStockTimeVal(
-  holdings: holding[],
-  date: Date
+export async function pairAllHoldingsWithStockTimeVal(
+  allHoldings: HoldingWithDate[]
 ) {
-  let currHolding;
-  let mostRecentTimeVal;
-  const HoldingsWithTimeVal = [];
-  for (let i = 0; i < holdings.length; i++) {
-    //Shouldn't be undefined.
-    currHolding = holdings[i] as holding;
+  const dateList = allHoldings.map((holdingsForDay) => holdingsForDay.date);
+  const perDaySymbolList = allHoldings.map((holdingsForDay) =>
+    holdingsForDay.holdings.map((holding) => holding.stock_symbol)
+  );
+  const promises = [];
 
-    mostRecentTimeVal = await prisma?.stockTimeVal.findFirst({
-      where: {
-        stock_symbol: { equals: currHolding?.stock_symbol },
-        timestamp: { equals: date },
-      },
-      orderBy: {
-        timestamp: "desc",
-      },
-    });
-    let holdingWithTimeVal: HoldingWithTimeVal;
-    if (isNullOrUndefined(mostRecentTimeVal)) {
-      holdingWithTimeVal = {
-        holding: currHolding,
-      };
-    } else {
-      holdingWithTimeVal = {
-        holding: currHolding,
-        price: mostRecentTimeVal.price,
-        timestamp: mostRecentTimeVal.timestamp,
-      };
+  for (let i = 0; i < dateList.length; i++) {
+    try {
+      const currDate = dateList[i];
+      const holdingList = perDaySymbolList[i];
+      const allStockTimeVals = prisma?.stockTimeVal.findMany({
+        where: {
+          timestamp: {
+            equals: currDate,
+          },
+          AND: {
+            stock_symbol: {
+              in: holdingList,
+            },
+          },
+        },
+      });
+      promises.push(allStockTimeVals);
+    } catch (e) {
+      console.log(e);
+      promises.push(undefined);
     }
-    HoldingsWithTimeVal.push(holdingWithTimeVal);
   }
-  return HoldingsWithTimeVal;
+  const valAry = await Promise.all(promises);
+  const retAry: HoldingWithValAtTime[] = valAry.map(function (val, valIndex) {
+    const currDate = dateList[valIndex];
+    if (val === undefined) {
+      return { holdings: [], time: currDate as Date };
+    }
+    const holdingMap = new Map<string, stockTimeVal>();
+    val.forEach((element) => {
+      holdingMap.set(element.stock_symbol, element);
+    });
+
+    const holdingsWithVal: HoldingWithVal[] = [];
+    allHoldings[valIndex]?.holdings.forEach(function (val, j) {
+      const pairedTimeVal = holdingMap.get(val.stock_symbol);
+      if (pairedTimeVal === undefined) {
+        console.log("Weird problem pairing!");
+        return;
+      }
+      holdingsWithVal.push({ holding: val, price: pairedTimeVal?.price });
+    });
+    return { holdings: holdingsWithVal, time: currDate as Date };
+  });
+  return retAry;
 }

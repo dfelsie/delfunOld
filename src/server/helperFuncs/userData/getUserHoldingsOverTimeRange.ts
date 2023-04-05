@@ -1,6 +1,6 @@
 import type { holding } from "@prisma/client";
 
-type HoldingWithDate = {
+export type HoldingWithDate = {
   date: Date;
   holdings: holding[];
 };
